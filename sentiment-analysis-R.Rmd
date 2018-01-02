@@ -87,4 +87,17 @@ bind_rows(afinn,
   geom_col(show.legend = FALSE) +
   facet_wrap(~method, ncol = 1, scales = "free_y") 
 ```
+# Most Common positive and negative word
+We can analyze word counts that contribute to each sentiment. By implementing count() here with arguments of both word and sentiment, we find out how much each word contributed to each sentiment.
+```{r}
+bing_word_counts<-pride_prejudice %>% inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort=T) %>% ungroup()
+bing_word_counts %>%group_by(sentiment) %>%
+  top_n(10) %>% ungroup() %>% mutate(word=reorder(word,n)) %>%
+  ggplot(aes(word,n,fill = sentiment))+
+  geom_col(show.legend = F)+
+  facet_wrap(~sentiment, scales = "free_y")+
+  labs(y="Contribution to sentiment", x = NULL)+
+  coord_flip()
+```
 
