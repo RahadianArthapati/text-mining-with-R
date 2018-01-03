@@ -88,9 +88,10 @@ bind_rows(afinn,
   facet_wrap(~method, ncol = 1, scales = "free_y") 
 ```
 # Most Common positive and negative word
-We can analyze word counts that contribute to each sentiment. By implementing count() here with arguments of both word and sentiment, we find out how much each word contributed to each sentiment.
+We can analyze word counts that contribute to each sentiment. By implementing count() here with arguments of both word and sentiment, we find out how much each word contributed to each sentiment. However, there is an anomaly in the sentiment analysis; the word “miss” is coded as negative but it is used as a title for young, unmarried women in Jane Austen’s works. If it were appropriate for our purposes, we could easily add “miss” to a custom stop-words list using bind_rows().
 ```{r}
-bing_word_counts<-pride_prejudice %>% inner_join(get_sentiments("bing")) %>%
+custom_stop_words<-bind_rows(data_frame(word=c("miss"),lexicon=c("custom")),stop_words)
+bing_word_counts<-pride_prejudice %>% inner_join(get_sentiments("bing")) %>% anti_join(custom_stop_words) %>%
   count(word, sentiment, sort=T) %>% ungroup()
 bing_word_counts %>%group_by(sentiment) %>%
   top_n(10) %>% ungroup() %>% mutate(word=reorder(word,n)) %>%
@@ -99,5 +100,3 @@ bing_word_counts %>%group_by(sentiment) %>%
   facet_wrap(~sentiment, scales = "free_y")+
   labs(y="Contribution to sentiment", x = NULL)+
   coord_flip()
-```
-
